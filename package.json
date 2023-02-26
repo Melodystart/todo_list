@@ -7,13 +7,14 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node models/seeds/todoSeeder.js" // 新增腳本
+    "seed": "node models/seeds/todoSeeder.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
+    "express-handlebars": "^6.0.7",
     "mongoose": "^6.10.0"
   },
   "devDependencies": {
