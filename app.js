@@ -38,12 +38,20 @@ app.get('/', (req, res) => {
     .then(todos => res.render('index', { todos: todos })) // 將資料傳給 index 樣板
     .catch(error => console.log(error))// 錯誤處理
 })
-
+// 設定detail頁面路由
 app.get('/todos/:id', (req, res) => {
   const id = req.params.id
   return Todo.findById(id)
     .lean()
     .then((todo) => res.render('detail', { todo: todo }))
+    .catch(error => console.log(error))
+})
+// 設定edit頁面路由
+app.get('/todos/:id/edit', (req, res) => {
+  const id = req.params.id
+  return Todo.findById(id)
+    .lean()
+    .then((todo) => res.render('edit', { todo: todo }))
     .catch(error => console.log(error))
 })
 
@@ -57,6 +65,19 @@ app.post('/todos', (req, res) => {
   const name = req.body.name // 從 req.body 拿出表單裡的 name 資料
   return Todo.create({ name: name }) // 存入資料庫
     .then(() => res.redirect('/')) // 新增完成後導回首頁
+    .catch(error => console.log(error))
+})
+
+//設定路由來接住表單資料，並且把資料送往資料庫
+app.post('/todos/:id/edit', (req, res) => {
+  const id = req.params.id //id 要從網址上用 req.params.id 拿下來，
+  const name = req.body.name //name 要用 req.body.name 從表單拿出來
+  return Todo.findById(id)
+    .then(todo => {
+      todo.name = name
+      return todo.save()
+    })
+    .then(() => res.redirect(`/todos/${id}`))
     .catch(error => console.log(error))
 })
 
