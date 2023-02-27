@@ -60,7 +60,7 @@ app.get('/todos/new', (req, res) => {
   return res.render('new')
 })
 
-//設定路由來接住表單資料，並且把資料送往資料庫
+//設定路由來接住表單新增資料，並且把資料送往資料庫
 app.post('/todos', (req, res) => {
   const name = req.body.name // 從 req.body 拿出表單裡的 name 資料
   return Todo.create({ name: name }) // 存入資料庫
@@ -68,7 +68,7 @@ app.post('/todos', (req, res) => {
     .catch(error => console.log(error))
 })
 
-//設定路由來接住表單資料，並且把資料送往資料庫
+//設定路由來接住表單修改資料，並且把資料送往資料庫
 app.post('/todos/:id/edit', (req, res) => {
   const id = req.params.id //id 要從網址上用 req.params.id 拿下來，
   const name = req.body.name //name 要用 req.body.name 從表單拿出來
@@ -78,6 +78,15 @@ app.post('/todos/:id/edit', (req, res) => {
       return todo.save()
     })
     .then(() => res.redirect(`/todos/${id}`))
+    .catch(error => console.log(error))
+})
+
+//設定路由來刪除資料
+app.post('/todos/:id/delete', (req, res) => {
+  const id = req.params.id //透過 req.params.id 取得網址上的識別碼，用來查詢使用者想刪除的 To-do
+  return Todo.findById(id) //使用 Todo.findById 查詢資料，資料庫查詢成功以後，會把資料放進 todo
+    .then(todo => todo.remove())
+    .then(() => res.redirect('/')) //成功刪除以後，使用 redirect 重新呼叫首頁，此時會重新發送請求給 GET /，進入到另一條路由。
     .catch(error => console.log(error))
 })
 
