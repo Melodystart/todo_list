@@ -2,15 +2,16 @@
 const express = require('express')
 const mongoose = require('mongoose') // 載入 mongoose
 const exphbs = require('express-handlebars')
-const Todo = require('./models/todo')
+
 const bodyParser = require('body-parser')// 引用 body-parser
 const methodOverride = require('method-override')
 // 加入這段 code, 僅在非正式環境時, 使用 dotenv
 if (process.env.NODE_ENV != 'production') {
   require('dotenv').config()
 }
-
+const routes = require('./routes') // 引用路由器
 const app = express()
+
 mongoose.connect(process.env.MONGODB_URI) // 設定連線到 mongoDB
 
 // 取得資料庫連線狀態
@@ -35,67 +36,10 @@ app.use(bodyParser.urlencoded({ extended: true }))
 //讓每一筆路由都會透過 method-override 進行前置處理
 app.use(methodOverride('_method'))
 
-// 設定首頁路由
-app.get('/', (req, res) => {
-  Todo.find() // 取出 Todo model 裡的所有資料
-    .lean() // 把 Mongoose 的 Model 物件轉換成乾淨的 JavaScript 資料陣列
-    .sort({ _id: 'asc' })
-    .then(todos => res.render('index', { todos: todos })) // 將資料傳給 index 樣板
-    .catch(error => console.log(error))// 錯誤處理
-})
+// 將 request 導入路由器
+app.use(routes)
 
-// 設定new頁面路由
-app.get('/todos/new', (req, res) => {
-  return res.render('new')
-})
 
-// 設定detail頁面路由
-app.get('/todos/:id', (req, res) => {
-  const id = req.params.id
-  return Todo.findById(id)
-    .lean()
-    .then((todo) => res.render('detail', { todo: todo }))
-    .catch(error => console.log(error))
-})
-// 設定edit頁面路由
-app.get('/todos/:id/edit', (req, res) => {
-  const id = req.params.id
-  return Todo.findById(id)
-    .lean()
-    .then((todo) => res.render('edit', { todo: todo }))
-    .catch(error => console.log(error))
-})
-
-//設定路由來接住表單新增資料，並且把資料送往資料庫
-app.post('/todos', (req, res) => {
-  const name = req.body.name // 從 req.body 拿出表單裡的 name 資料
-  return Todo.create({ name: name }) // 存入資料庫
-    .then(() => res.redirect('/')) // 新增完成後導回首頁
-    .catch(error => console.log(error))
-})
-
-//設定路由來接住表單修改資料，並且把資料送往資料庫
-app.put('/todos/:id', (req, res) => {
-  const id = req.params.id //id 要從網址上用 req.params.id 拿下來，
-  const { name, isDone } = req.body //從填寫表單資料取出name, isDone
-  return Todo.findById(id)
-    .then(todo => {
-      todo.name = name
-      todo.isDone = isDone === "on"
-      return todo.save()
-    })
-    .then(() => res.redirect(`/todos/${id}`))
-    .catch(error => console.log(error))
-})
-
-//設定路由來刪除資料
-app.delete('/todos/:id', (req, res) => {
-  const id = req.params.id //透過 req.params.id 取得網址上的識別碼，用來查詢使用者想刪除的 To-do
-  return Todo.findById(id) //使用 Todo.findById 查詢資料，資料庫查詢成功以後，會把資料放進 todo
-    .then(todo => todo.remove())
-    .then(() => res.redirect('/')) //成功刪除以後，使用 redirect 重新呼叫首頁，此時會重新發送請求給 GET /，進入到另一條路由。
-    .catch(error => console.log(error))
-})
 
 // 設定 port 3000
 app.listen(3000, () => {
