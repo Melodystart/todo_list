@@ -4,6 +4,7 @@ const mongoose = require('mongoose') // 載入 mongoose
 const exphbs = require('express-handlebars')
 const Todo = require('./models/todo')
 const bodyParser = require('body-parser')// 引用 body-parser
+const methodOverride = require('method-override')
 // 加入這段 code, 僅在非正式環境時, 使用 dotenv
 if (process.env.NODE_ENV != 'production') {
   require('dotenv').config()
@@ -30,6 +31,9 @@ app.set('view engine', 'hbs')
 
 // 用 app.use 規定每一筆請求都需要透過 body-parser 進行前置處理
 app.use(bodyParser.urlencoded({ extended: true }))
+
+//讓每一筆路由都會透過 method-override 進行前置處理
+app.use(methodOverride('_method'))
 
 // 設定首頁路由
 app.get('/', (req, res) => {
@@ -71,7 +75,7 @@ app.post('/todos', (req, res) => {
 })
 
 //設定路由來接住表單修改資料，並且把資料送往資料庫
-app.post('/todos/:id/edit', (req, res) => {
+app.put('/todos/:id', (req, res) => {
   const id = req.params.id //id 要從網址上用 req.params.id 拿下來，
   const { name, isDone } = req.body //從填寫表單資料取出name, isDone
   return Todo.findById(id)
@@ -85,7 +89,7 @@ app.post('/todos/:id/edit', (req, res) => {
 })
 
 //設定路由來刪除資料
-app.post('/todos/:id/delete', (req, res) => {
+app.delete('/todos/:id', (req, res) => {
   const id = req.params.id //透過 req.params.id 取得網址上的識別碼，用來查詢使用者想刪除的 To-do
   return Todo.findById(id) //使用 Todo.findById 查詢資料，資料庫查詢成功以後，會把資料放進 todo
     .then(todo => todo.remove())
