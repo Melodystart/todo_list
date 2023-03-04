@@ -71,10 +71,11 @@ app.post('/todos', (req, res) => {
 //設定路由來接住表單修改資料，並且把資料送往資料庫
 app.post('/todos/:id/edit', (req, res) => {
   const id = req.params.id //id 要從網址上用 req.params.id 拿下來，
-  const name = req.body.name //name 要用 req.body.name 從表單拿出來
+  const { name, isDone } = req.body //從填寫表單資料取出name, isDone
   return Todo.findById(id)
     .then(todo => {
       todo.name = name
+      todo.isDone = isDone === "on"
       return todo.save()
     })
     .then(() => res.redirect(`/todos/${id}`))
