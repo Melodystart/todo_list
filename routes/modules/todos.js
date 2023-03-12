@@ -28,8 +28,10 @@ router.get('/:id/edit', (req, res) => {
 
 //設定路由來接住表單新增資料，並且把資料送往資料庫
 router.post('/', (req, res) => {
-  const name = req.body.name // 從 req.body 拿出表單裡的 name 資料
-  return Todo.create({ name: name }) // 存入資料庫
+  const todos = String(req.body.name).split(',').map(todo => ({ name: todo })); // 從 req.body 拿出表單裡的 name 資料並以","分割資料
+  //[123,456]
+  //[{name:123},{name:456}]
+  Todo.insertMany(todos)
     .then(() => res.redirect('/')) // 新增完成後導回首頁
     .catch(error => console.log(error))
 })
