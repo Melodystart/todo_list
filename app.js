@@ -8,6 +8,9 @@ const routes = require('./routes') // 引用路由器
 require('./config/mongoose') //重構 Mongoose 連線設定
 
 const app = express()
+// 如果在 Heroku 環境則使用 process.env.PORT
+// 否則為本地環境，使用 3000 
+const PORT = process.env.PORT || 3000
 
 // 設定 Handlebars
 app.engine('hbs', exphbs.engine({ defaultLayout: 'main', extname: '.hbs' }))
@@ -19,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 // 將 request 導入路由器
 app.use(routes)
-// 設定 port 3000
-app.listen(3000, () => {
-  console.log('App is running on http://localhost:3000')
+// 設定應用程式監聽的埠號
+app.listen(PORT, () => {
+  console.log(`App is running on http://localhost:${PORT}`)
 })
